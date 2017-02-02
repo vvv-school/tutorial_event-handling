@@ -112,7 +112,19 @@ Your module will
 
 Unlike standard cameras, there is no "images" or "frames" when using events so we need to create an image frame from recent events that have occurred if we want to visualise the output on a synchronous display. This means that we are going to grab all of the events within a given time window (e.g. 30ms) and create a frame.
 
+The vFramer has different modes of operation:
 
+###### AE
+
+![ae](./misc/ae.png)
+
+###### ISO
+
+![iso](./misc/iso.png)
+
+###### FLOW
+
+![flow](./misc/flow.png)
 
 
 
