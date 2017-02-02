@@ -141,7 +141,7 @@ If possible vFramer will try to render frames at the given --frameRate, and the 
 ###### AE
 A simple view
 
-![ae](./misc/ae.png)
+![ae](./misc/AE.png)
 
 ###### ISO
 A more beautiful view
@@ -151,7 +151,7 @@ A more beautiful view
 ###### FLOW
 Visualise optical flow (we'll see this in the next tutorial)
 
-![flow](./misc/flow.png)
+![flow](./misc/AEFLOW.png)
 
 
 
