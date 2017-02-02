@@ -1,5 +1,5 @@
-# Tutorial on Handling Event Driven Data Stream -- Optical Flow
-This tutorial introduces the basic components for handling event-driven data stream. We will use an example application, the **event-driven optical flow**, to learn the dedicated data structures and functions in the event-driven library and the basic components required to create an event-driven module.
+# Tutorial on Handling Event Driven Data Stream -- Handling Events
+This tutorial introduces the basic components for handling event-driven data stream. You will use a simple application to learn the dedicated data structures and functions in the event-driven library and the basic components required to create an event-driven module.
 
 # Requirements:
 Your current set-up comprises YARP, iCub (some of the event-driven modules require iCub) and iCubContrib (for easy install of the executables). In addition you need the **robotology-playground/event-driven**(https://github.com/robotology-playground/event-driven.git) library.
@@ -10,7 +10,6 @@ The event-driven code is already installed in your virtual machine (alternativel
 # The event-driven library
 
 The event-driven library allows you to use datastructures and helper modules to handle events. 
-You need to include it in your header file `vOptFlow.h`. 
 
 ```javascript
 #include "iCub/eventdriven/all.h"
@@ -38,15 +37,13 @@ Some other useful (but not covered today) modules are:
 
 ### Events in event-driven libraries:
 
-
 ```javascript
 EXAMPLE OF VEVENT - snapshot of code - store time
 //FILL HERE THE CODE
 
 ``` 
 
-- ADDRESSEVENT (AE)  - adds x and y
-
+- ADDRESSEVENT (AE)  - adds coordinates (x, y), channel (left, right) and polarity (on, off)
 
 ### YARP vBottle
 How do we send events between processes?
@@ -100,11 +97,16 @@ for(qi = q.front(); qi != q.end(); qi++) {
 }
 ```
 
-A typical workflow will be:
+Our test application will be:
 
-ADDRESSEVENT       FLOWEVENT
-CAMERA -> GRABBER -> PROCESS -> ROBOT BEHAVIOUR
-                                     -> VFRAMER
+![ev_hand](./misc/tutorial1.png)
+
+Your module will 
+
+1. read events in the callback function (OnRead), 
+1. compute the event rate and display the result in **yarpscope**
+1. modify the address events in the bottle (as you wish) 
+1. use **vFramer** to create images and display them with **yarpview**
 
 ### Modules: vFramer
 
