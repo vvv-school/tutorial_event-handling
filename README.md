@@ -37,11 +37,27 @@ Some other useful (but not all covered today) modules are:
 - ...
 
 ### Events in event-driven libraries:
+A summary of the vEvent class:
 
 ```javascript
-EXAMPLE OF VEVENT - snapshot of code - store time
-//FILL HERE THE CODE
+class vEvent
+{
 
+protected:
+    unsigned int stamp;
+
+public:
+    vEvent() : stamp(0) {}
+    vEvent(const vEvent &event);
+    virtual ~vEvent() {}
+    
+    void setStamp(const unsigned int stamp)   { this->stamp = stamp; }
+    int getStamp() const                      { return stamp;        }
+
+    virtual void encode(yarp::os::Bottle &b) const;
+    virtual bool decode(const yarp::os::Bottle &packet, int &pos);
+
+};
 
 ``` 
 Therefore the vEvent simply indicates that __something__ happened at a specific time. The event cameras produce events with a sensor array address space, and the vEvent is not enough to represent this extra information. The AddressEvent is inherited from the vEvent with extra data fields: 
