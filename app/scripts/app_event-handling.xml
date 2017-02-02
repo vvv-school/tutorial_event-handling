@@ -1,0 +1,50 @@
+<application>
+<name> event-handling </name>
+
+<dependencies>
+</dependencies>
+
+<module>
+    <name> yarpdataplayer </name>
+    <node> localhost </name>
+</module>
+
+<module>
+    <name> tutorial_event-handling</name>
+    <parameters>--name /event-handler --height 240 --width 304 </parameters>
+    <node>localhost</node>
+</module>
+
+<module>
+    <name>vFramer</name>
+    <parameters> --displays "(1 right (AE))" --height 240 --width 304 </parameters>
+    <node>localhost</node>
+</module>
+
+<module>
+    <name>yarpview</name>
+    <parameters>--name /event-right-cam </parameters>
+    <node>localhost</node>
+</module>
+
+
+<connection>
+    <from>/zynqGrabber/vBottle:o</from>
+    <to>/event-handler/vBottle:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from>/event-handler/vBottle:o</from>
+    <to>/vFramer/vBottle:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from> /vFramer/right</from>
+    <to> /event-right-cam </to>
+    <protocol>udp</protocol>
+</connection>
+
+
+</application>
