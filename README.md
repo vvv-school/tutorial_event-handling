@@ -37,7 +37,8 @@ Some other useful (but not all covered today) modules are:
 - ...
 
 ### Events in event-driven libraries:
-A summary of the vEvent class:
+
+We actually use several different types of events in out library and therefore we define a base class of event, the vEvent:
 
 ```javascript
 class vEvent
@@ -64,7 +65,7 @@ Therefore the vEvent simply indicates that __something__ happened at a specific 
 
 - ADDRESSEVENT (AE)  - adds coordinates (x, y), channel (left, right) and polarity (on, off)
 
-In code we wrap the events using shared pointers to avoid excessive memory allocation as events are passed around a module. (i.e. the allocate once principle in the first days lecture). We reference events as:
+In code we wrap the events using shared pointers to avoid excessive memory allocation as events are passed around a module. In many applications we don't know exactly for how long we need to keep an event and how often we might need to use it for processing; we don't have a frame for which we know we can compute all pixels together. Shared pointers simplifies the handling of memory. It also follows the allocate once principle mentioned in the first day's lecture. We reference events as:
 
 ```javascript
 event<vEvent>    //can represent any type of event
@@ -72,10 +73,9 @@ event<>          //equal to event<vEvent>
 event<AddressEvent> 
 ``` 
 
-### YARP vBottle
-How do we send events between processes?
+### event-driven and YARP
 
-**Using YARP obviously!**
+We are processing events to for humanoid vision on the iCub, therefore we use YARP! We therefore also integrate with as much of the current tools as possible.
 
 We send events in packets using yarp Bottles, but we make a modified version (a vBottle) that inherits from a standard YARP bottle so we can:
 
