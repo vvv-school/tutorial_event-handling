@@ -5,8 +5,10 @@
 */
 #include <string>
 
-#include <rtf/yarp/YarpTestCase.h>
+#include <yarp/rtf/TestCase.h>
 #include <rtf/dll/Plugin.h>
+#include <rtf/TestAssert.h>
+
 
 #include <yarp/os/all.h>
 #include <iCub/eventdriven/all.h>
@@ -16,7 +18,7 @@ using namespace RTF;
 
 
 /**********************************************************************/
-class TestTutorialEventHandler : public YarpTestCase
+class TestTutorialEventHandler : public yarp::rtf::TestCase
 {
 
 private:
@@ -27,7 +29,7 @@ private:
 public:
     /******************************************************************/
     TestTutorialEventHandler() :
-        YarpTestCase("TestAssignmentEventSpikingModel")
+        yarp::rtf::TestCase("TestAssignmentEventSpikingModel")
     {
     }
 
