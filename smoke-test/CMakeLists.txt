@@ -24,7 +24,6 @@ list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
 include_directories(${CMAKE_SOURCE_DIR}
                     ${RTF_INCLUDE_DIRS}
                     ${YARP_INCLUDE_DIRS}
-                    ${YARP_HELPERS_INCLUDE_DIR}
                     ${eventdriven_INCLUDE_DIRS})
 
 # add the source codes to build the plugin library
