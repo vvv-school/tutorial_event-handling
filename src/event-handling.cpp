@@ -1,80 +1,156 @@
+/*
+ *   Copyright (C) 2017 Event-driven Perception for Robotics
+ *   Author: arren.glover@iit.it
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "event-handling.h"
 #include <math.h>
 
 /******************************************************************************/
 //main
 /******************************************************************************/
-
 int main(int argc, char * argv[])
 {
     /* initialize yarp network */
     yarp::os::Network yarp;
+    if(!yarp.checkNetwork()) {
+        yError() << "Could not find YARP network";
+        return -1;
+    }
 
     /* prepare and configure the resource finder */
     yarp::os::ResourceFinder rf;
-    rf.setDefaultConfigFile("spikingModel.ini");
+    rf.setDefaultConfigFile("event-rate-calc.ini");
     rf.setDefaultContext("eventdriven");
     rf.configure(argc, argv);
 
     /* instantiate the module */
-    eventHandlerConfiguration mymodule;
+    eventRateConfiguration mymodule;
     return mymodule.runModule(rf);
 }
 
 /******************************************************************************/
-//spikingConfiguration
+//rateCalcThread
 /******************************************************************************/
-bool eventHandlerConfiguration::configure(yarp::os::ResourceFinder &rf)
+
+void rateCalcThread::setInputPortName(std::string name)
 {
-    return eh.initialise(rf.check("name", yarp::os::Value("/vTutorialEventHandling")).asString(),
-                                   rf.check("strict", yarp::os::Value(true)).asBool(),
-                                   rf.check("height", yarp::os::Value(240)).asInt(),
-                                   rf.check("width", yarp::os::Value(304)).asInt());
+    port_name = name;
 }
 
-
-/******************************************************************************/
-//spikingModel
-/******************************************************************************/
-bool eventHandler::initialise(std::string name, bool strict, unsigned int height, unsigned int width)
+yarp::sig::Vector rateCalcThread::getRate()
 {
-
-    this->strict = strict;
-    if(strict) {
-        std::cout << "Setting " << name << " to strict" << std::endl;
-        setStrict();
+    if(current_period > 0) {
+        current_period *= vtsHelper::tsscaler;
+        rates[0] = left_count / current_period;
+        rates[1] = right_count / current_period;
     }
 
-    this->useCallback();
-    if(!open(name + "/vBottle:i"))
+    current_period = 0;
+    left_count = 0;
+    right_count = 0;
+
+    return rates;
+
+}
+
+bool rateCalcThread::threadInit()
+{
+    rates.resize(2, 0.0);
+    return q_alloc.open(port_name + "/vBottle:i");
+}
+
+void rateCalcThread::run()
+{
+    yarp::os::Stamp stamp;
+    while(!isStopping()) {
+
+        vQueue* q = q_alloc.getNextQ(stamp);
+        if(!q) {
+            if(!isStopping())
+                yError() << "No queue available but not asked to stop!";
+            return;
+        }
+
+        for(size_t i = 0; i < q->size(); i++) {
+            auto v = is_event<AE>(q->at(i));
+            if(v->channel)
+                right_count++;
+            else
+                left_count++;
+        }
+
+        double dt = q->back()->stamp - q->front()->stamp;
+        if(dt < 0) dt += vtsHelper::max_stamp;
+
+        current_period += dt;
+
+        q_alloc.scrapQ();
+    }
+}
+
+void rateCalcThread::onStop()
+{
+    q_alloc.close();
+    q_alloc.releaseDataLock();
+}
+
+/******************************************************************************/
+//eventRateConfiguration
+/******************************************************************************/
+bool eventRateConfiguration::configure(yarp::os::ResourceFinder &rf)
+{
+    //get the module update rate
+    period = rf.check("period", yarp::os::Value(0.01)).asDouble();
+
+    //get the module name
+    std::string name = rf.check("name", yarp::os::Value("/vRate")).asString();
+
+    //open the output port displaying the rate
+    if(!rateOutPort.open(name + "/rate:o")) {
         return false;
-    if(!outputPort.open(name + "/vBottle:o"))
-        return false;
+    }
 
-    this->height = height;
-    this->width = width;
-
-    return true;
-
+    //set the input port name and start the thread
+    rate_calculator.setInputPortName(
+                rf.check("name", yarp::os::Value("/vRate")).asString());
+    return rate_calculator.start();
 }
 
-void eventHandler::onRead(vBottle &input)
+double eventRateConfiguration::getPeriod()
 {
-    //remove the left camera and flip the image on the y-axis
-    //port envelopes, vQueue, getas, ...
-
-    //FILL IN THE CODE HERE
-
+    return period;
 }
 
-void eventHandler::interrupt()
+bool eventRateConfiguration::updateModule()
 {
-    outputPort.interrupt();
-    yarp::os::BufferedPort<vBottle>::interrupt();
+
+    rateOutPort.prepare() = rate_calculator.getRate();
+    rateOutPort.write();
+
+    return !isStopping();
 }
 
-void eventHandler::close()
-{
-    outputPort.close();
-    yarp::os::BufferedPort<vBottle>::close();
+bool eventRateConfiguration::interruptModule() {
+    rate_calculator.stop();
+    rateOutPort.close();
+    return yarp::os::RFModule::interruptModule();
 }
+
+
+
+
+

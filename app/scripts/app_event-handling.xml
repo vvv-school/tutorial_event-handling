@@ -1,48 +1,78 @@
 <application>
-<name> event-handling </name>
+<name> event-rate-calculation </name>
 
 <dependencies>
 </dependencies>
 
 <module>
     <name> yarpdataplayer </name>
-    <node> localhost </name>
+    <parameters> </parameters>
+    <node> localhost </node>
 </module>
 
 <module>
-    <name> tutorial_event-handling</name>
-    <parameters>--name /event-handler --height 240 --width 304 </parameters>
+    <name> vPreProcess </name>
+    <parameters> --flipx --flipy --temporalSize 250000 </parameters>
+    <node> localhost </node>
+</module>
+
+<module>
+    <name> tutorial_event-rate</name>
+    <parameters> --name /vRate --period 0.1 </parameters>
     <node>localhost</node>
 </module>
 
 <module>
     <name>vFramer</name>
-    <parameters> --displays "(1 right (AE))" --height 240 --width 304 </parameters>
+    <parameters> --displays "(0 /left (AE) 1 /right (AE))" --frameRate 20 </parameters>
     <node>localhost</node>
 </module>
 
 <module>
     <name>yarpview</name>
-    <parameters>--name /event-right-cam </parameters>
+    <parameters>--name /view/left </parameters>
     <node>localhost</node>
 </module>
 
+<module>
+    <name>yarpview</name>
+    <parameters>--name /view/right </parameters>
+    <node>localhost</node>
+</module>
+
+<module>
+    <name>yarpscope</name>
+    <parameters>--remote /vRate/rate:o --index "(0 1)" --color "(green blue)" </parameters>
+    <node>localhost</node>
+</module>
 
 <connection>
     <from>/zynqGrabber/vBottle:o</from>
-    <to>/event-handler/vBottle:i</to>
+    <to>/vPreProcess/vBottle:i</to>
     <protocol>udp</protocol>
 </connection>
 
 <connection>
-    <from>/event-handler/vBottle:o</from>
-    <to>/vFramer/vBottle:i</to>
+    <from>/vPreProcess/vBottle:o</from>
+    <to>/vRate/vBottle:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from>/vPreProcess/vBottle:o</from>
+    <to>/vFramer/AE:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from> /vFramer/left</from>
+    <to> /view/left </to>
     <protocol>udp</protocol>
 </connection>
 
 <connection>
     <from> /vFramer/right</from>
-    <to> /event-right-cam </to>
+    <to> /view/right </to>
     <protocol>udp</protocol>
 </connection>
 
