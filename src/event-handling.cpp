@@ -25,14 +25,14 @@
 int main(int argc, char * argv[])
 {
     /* initialize yarp network */
-    yarp::os::Network yarp;
+    Network yarp;
     if(!yarp.checkNetwork()) {
         yError() << "Could not find YARP network";
         return -1;
     }
 
     /* prepare and configure the resource finder */
-    yarp::os::ResourceFinder rf;
+    ResourceFinder rf;
     rf.setDefaultConfigFile("event-rate-calc.ini");
     rf.setDefaultContext("eventdriven");
     rf.configure(argc, argv);
@@ -53,15 +53,10 @@ void rateCalcThread::setInputPortName(std::string name)
 
 yarp::sig::Vector rateCalcThread::getRate()
 {
-    if(current_period > 0) {
-        current_period *= vtsHelper::tsscaler;
-        rates[0] = left_count / current_period;
-        rates[1] = right_count / current_period;
-    }
 
-    current_period = 0;
-    left_count = 0;
-    right_count = 0;
+    // FILL IN CODE HERE
+    // calculate the event rate from count and period.
+    // remember to scale the time value
 
     return rates;
 
@@ -75,30 +70,15 @@ bool rateCalcThread::threadInit()
 
 void rateCalcThread::run()
 {
+
     yarp::os::Stamp stamp;
     while(!isStopping()) {
 
-        vQueue* q = q_alloc.getNextQ(stamp);
-        if(!q) {
-            if(!isStopping())
-                yError() << "No queue available but not asked to stop!";
-            return;
-        }
+        // FILL IN CODE HERE
+        // ask for a q, count the left and right events, count the time period
+        // deallocate the q.
+        // what else can we count?
 
-        for(size_t i = 0; i < q->size(); i++) {
-            auto v = is_event<AE>(q->at(i));
-            if(v->channel)
-                right_count++;
-            else
-                left_count++;
-        }
-
-        double dt = q->back()->stamp - q->front()->stamp;
-        if(dt < 0) dt += vtsHelper::max_stamp;
-
-        current_period += dt;
-
-        q_alloc.scrapQ();
     }
 }
 
@@ -137,9 +117,8 @@ double eventRateConfiguration::getPeriod()
 
 bool eventRateConfiguration::updateModule()
 {
-
-    rateOutPort.prepare() = rate_calculator.getRate();
-    rateOutPort.write();
+    // FILL IN CODE HERE
+    // get the rates and output it to the out port
 
     return !isStopping();
 }
