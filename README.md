@@ -1,73 +1,71 @@
 # Tutorial on Handling the Event Driven Data Stream
 This tutorial introduces the basic components for handling event-driven data stream. You will use a simple application to learn the dedicated data structures and functions in the event-driven library and the basic components required to create an event-driven module.
 
-# Requirements:
-Your current set-up comprises YARP, iCub (some of the event-driven modules require iCub) and iCubContrib (for easy install of the executables). In addition you need the **robotology-playground/event-driven**(https://github.com/robotology-playground/event-driven.git) library.
-
-### Note: 
-The event-driven code is already installed in your virtual machine (alternatively, you should have followed the installing instructions in the vvv [wiki](https://github.com/vvv-school/vvv-school.github.io/blob/master/instructions/how-to-prepare-your-system.md#install-event-driven)), however, as there have been few updates, you need to follow [these instrucitons](https://github.com/vvv-school/vvv17/issues/39). 
+### Requirements:
+You should be familiar with the framework used by event-driven, and the required software and datasets, introduced in the [first tutorial](https://github.com/vvv-school/tutorial_event-driven-framework).
 
 # The event-driven library
 
-The event-driven library allows you to use datastructures and helper modules to handle events. To include the libraries and use the namespace:
+The event-driven library allows you to use datastructures and helper modules to read and write events on YARP ports, perform basic filtering, and more complex organisation. Generic access to timing information depending on the hardware is also available. To include the libraries and use the namespace:
 
-```javascript
+```c++
 #include "iCub/eventdriven/all.h"
 using namespace ev;
 ``` 
 
 In this tutorial you will learn:
 
+- Classes
+  - qAllocator
 - Datastructures
-  - vEvent
-  - vBottle
   - vQueue
-
-- Modules
-  - vFramer
-
-Some other useful (but not all covered today) modules are:
-- some "smarter" event storage structures
-- camera un-distortion, 
-- salt and pepper filter, 
-- robot interfaces, 
-- circle detection, 
-- cluster tracking,
-- corner detection,
-- ...
+  - vEvent
+- An understanding of the event-stream
 
 ### Events in event-driven libraries:
 
-We actually use several different types of events in out library and therefore we define a base class of event, the vEvent:
+There are several types of events in the event-driven library (we will use just one) and therefore we define a base class of event, the vEvent:
 
-```javascript
+```c++
 class vEvent
 {
-
-protected:
-    unsigned int stamp;
-
 public:
-    vEvent() : stamp(0) {}
-    vEvent(const vEvent &event);
-    virtual ~vEvent() {}
-    
-    void setStamp(const unsigned int stamp)   { this->stamp = stamp; }
-    int getStamp() const                      { return stamp;        }
+    static const std::string tag;
+    unsigned int stamp:31;
 
+    vEvent();
+    virtual ~vEvent();
+
+    virtual event<> clone();
     virtual void encode(yarp::os::Bottle &b) const;
+    virtual void encode(std::vector<YARP_INT32> &b, unsigned int &pos) const;
     virtual bool decode(const yarp::os::Bottle &packet, int &pos);
-
+    virtual yarp::os::Property getContent() const;
+    virtual std::string getType() const;
+    virtual int getChannel() const;
+    virtual void setChannel();
 };
 
 ``` 
-Therefore the vEvent simply indicates that __something__ happened at a specific time. The event cameras produce events with a sensor array address space, and the vEvent is not enough to represent this extra information. The AddressEvent is inherited from the vEvent with extra data fields: 
+The vEvent only contains a tag and a timestamp, which that __something__ happened at a specific time. The event cameras produce events with a sensor array address space, and the vEvent is not enough to represent this extra information. The AddressEvent is inherited from the vEvent and contains more datafields and the tag will be different: 
 
-- ADDRESSEVENT (AE)  - adds coordinates (x, y), channel (left, right) and polarity (on, off)
+```c++
+class AddressEvent : public vEvent
+{
+public:
+    static const std::string tag;
+    unsigned int x:10; // u position of the camera pixel
+    unsigned int y:10; // v position of the camera pixel
+    unsigned int channel:1; // left/right camera
+    unsigned int polarity:1; //increase / decrease in light
+    
+ ...
+```
+Other events can define such things as velocity, a spatial distribution, or a point in 3D space by extending the data fields further.
 
-In code we wrap the events using shared pointers to avoid excessive memory allocation as events are passed around a module. In many applications we don't know exactly for how long we need to keep an event and how often we might need to use it for processing; we don't have a frame for which we know we can compute all pixels together. Shared pointers simplifies the handling of memory. It also follows the allocate once principle mentioned in the first day's lecture. We reference events as:
+When allocating events, we wrap them using shared pointers to avoid excessive memory allocation as events are passed around a module. In many applications we don't know exactly for how long we need to keep an event and how often we might need to use it for processing; we don't have a frame for which we know we can compute all pixels together. Shared pointers simplifies the handling of memory. We reference events as:
 
-```javascript
+```c++
 event<vEvent>    //can represent any type of event
 event<>          //equal to event<vEvent>
 event<AddressEvent> 
@@ -125,17 +123,6 @@ Your module will
 1. compute the event rate and display the result in **yarpscope**
 1. modify the address events to correct the dataset.
 1. use **vFramer** to create images and display them with **yarpview**
-
-### Modules: vFramer
-
-Unlike standard cameras, there are no "images" or "frames" when using events so to visualise the camera output on a synchronous display we need to create an image frame from recent events. This means that we are going to grab all of the events within a given time window (e.g. 30ms) and create a frame. The vFramer module does this for us. 
-
-There are several command line arguments you can use in the vFramer, here is an example:
-
-```javascript
---frameRate 30 --displays "(0 left (AE ISO) 1 right (AE ISO))" --height 240 --width 304
-```
-If possible vFramer will try to render frames at the given --frameRate, and the camera resolution can be set in --height and --width. The --displays argument defines how the vFramer will draw frames using the format [channel#, outportname, drawtypes] with as many tuples defined as you like. The drawtypes can also be chained such that we can draw multiple different event types layered on the same image. Order is important and some draw types are incompatible (currently FLOW ISO won't work)
 
 
 ###### AE
