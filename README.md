@@ -134,7 +134,7 @@ input.setQLimit(maximum_stored_packets);
 
 To put all this together we will complete a tutorial that reads events and calculates the event rate.
 
-![ev_hand](./misc/tutorial1.png)
+![app_image](misc/app_event-rate-calculation.png)
 
 Your module will 
 
