@@ -18,7 +18,7 @@ The event-driven library allows you to use datastructures and helper modules to 
 using namespace ev;
 ``` 
 
-### Code: events:
+### Code: events
 
 There are several types of events in the event-driven library (we will use just one) and therefore we define a base class of event, the vEvent:
 
@@ -71,7 +71,7 @@ std::shared_ptr<vEvent>
 ```
 The above definition will be a (shared) pointer to any type of event, as all events derive from the vEvent class. In almost all cases events should be instantiated using the ``event<>`` form and **not directly**.
 
-## Code: vQueue:
+## Code: vQueue
 
 When you read events from the port (e.g. from ``/zynqGrabber/vBottle:o``) you will get multiple events in a packet. This packet is stored in a ``ev::vQueue``. The vQueue is a wrapper for a `std::deque< event<> >` so we can:
 ```c++
@@ -106,10 +106,31 @@ for(size_t i = 0; i < q.size(); i++) {
 }
 ```
 
-## Code: qAllocator:
+## Code: qAllocator
 
-The ``ev::qAllocator`` is a class that uses a ``yarp::os::BufferedPort`` to read events asynchronously (it uses a callback) and allocates the ``ev::vQueue`` for each packet. 
+The ``ev::qAllocator`` is a class that uses a ``yarp::os::BufferedPort`` to read events asynchronously (it uses a callback) and allocates the ``ev::vQueue`` for each packet. An event-driven processing module will need to ask the ``qAllocator`` for a ``vQueue``:
+```
+yarp::os::Stamp yarp_stamp;
+qAllocator input;
+vQueue *q = input.getNextQ(yarp_stamp);
+```
+this is a blocking call: if there is nothing to process the thread will wait. If ``q == 0`` the qAllocator has manually been unlocked, which typically occurs when the module is closing. The yarp\_stamp is the port envelope (bottle #, CPU time). The processing module will also need to tell the ``qAllocator`` that the processing is finished:
+```
+input.scapQ();
+```
 
+A _strict_ sending protocol is used to transmit the event-stream. Therefore memory issues will occur if the processing thread is not fast enough to get, and scrap, packets of events at the rate they are transmitted. It is the responsibility of event-driven algorithms to monitor the "backlog" of packets. You can do so with several measures:
+
+```
+int a = input.queryunprocessed() //number of packets
+int b = input.queryDelayN() // number of events
+double c = input.queryDelayT() // number of seconds worth of events
+```
+The simplest method to prevent memory problems is to limit the number of packets:
+```
+int maximum_stored_packets = 1000;
+input.setQLimit(maximum_stored_packets);
+```
 
 To put all this together we will complete a tutorial that reads events and calculates the event rate.
 
@@ -117,47 +138,10 @@ To put all this together we will complete a tutorial that reads events and calcu
 
 Your module will 
 
-1. read events using the callback function (OnRead), 
-1. compute the event rate and display the result in **yarpscope**
-1. modify the address events to correct the dataset.
-1. use **vFramer** to create images and display them with **yarpview**
-
-
-###### AE
-A simple view
-
-![ae](./misc/AE.png)
-
-###### ISO
-A more beautiful view
-
-![iso](./misc/iso.png)
-
-###### FLOW
-Visualise optical flow (we'll see this in the next tutorial)
-
-![flow](./misc/AEFLOW.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+1. read events using a qAllocator
+1. calculate the eventrate
+1. calculate the event-rate of different event-types. (Channel, Polarity, Sensor position).
+1. visualise the event-rate on a ``yarpscope``
 
 
 
