@@ -23,31 +23,6 @@
 using namespace ev;
 using namespace yarp::os;
 
-class eventHandler : public yarp::os::BufferedPort<vBottle>
-{
-private:
-
-    //parameters
-    bool strict;
-
-    int height;
-    int width;
-
-    //ouput ports
-    yarp::os::BufferedPort<vBottle> outputPort;
-
-
-public:
-
-    eventHandler() : strict(false) {}
-    bool initialise(std::string name, bool strict = false, unsigned int height = 240, unsigned int width = 304);
-    void close();
-    void interrupt();
-
-    void onRead(vBottle &input);
-
-};
-
 /******************************************************************************/
 //rateCalcThread
 /******************************************************************************/
