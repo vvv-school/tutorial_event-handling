@@ -85,9 +85,8 @@ auto v2 = is_event<AddressEvent>(v1);
 ```
 and also upgrade events by adding new information to the previous event.
 ```c++
-auto v2 = make_event<FlowEvent>(v1);
-v2->vx = ...
-v2->vy = ...
+auto v2 = make_event<LabelledAE>(v1);
+v2->ID = 1;
 ```
 So to process the event stream, we typically iterate through the ``vQueue`` and perform some processing:
 
@@ -100,7 +99,7 @@ for(size_t i = 0; i < q.size(); i++) {
   bool is_corner = detect_corner(v);
   //and upgrade the event if needed
   if(is_corner) {
-    auto v_corner = make_event<InterestEvent>(v);
+    auto v_corner = make_event<LabelledAE>(v);
     q_corner.push_back(v_corner);
   }
 }
