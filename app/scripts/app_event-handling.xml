@@ -42,7 +42,7 @@
 
 <module>
     <name>yarpscope</name>
-    <parameters>--remote /vRate/rate:o --index "(0 1)" --color "(green blue)" </parameters>
+    <parameters>--remote /vRate/rate:o --index "(0 1)" --color "(green blue)" --interval 200 </parameters>
     <node>localhost</node>
 </module>
 
