@@ -61,6 +61,9 @@ public:
 ```
 Other events can define such things as velocity, a spatial distribution, or a point in 3D space by extending the data fields further.
 
+
+![inheritance](misc/inheritance.png)
+
 When allocating events, we wrap them using shared pointers to avoid excessive memory allocation as events are passed around a module. In many applications we don't know exactly for how long we need to keep an event and how often we might need to use it for processing; we don't have a frame for which we know we can compute all pixels together. Shared pointers simplifies the handling of memory. If you are familiar with shared\_pts:
 ```c++
 event<vEvent>
