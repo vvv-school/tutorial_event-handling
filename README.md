@@ -105,6 +105,11 @@ for(size_t i = 0; i < q.size(); i++) {
 }
 ```
 
+## Code: vBottle
+A ``ev::vBottle`` is a ``yarp::os::Bottle`` that has been modified (through inheritance) to store events in a way that is simple to a user, while taking advantage of everything that a standard bottle can do. Most importantly we can save and load event streams with the `yarpdataplayer` and `yarpdatadumper`. Add events to a `vBottle` by: `ev::vBottle::addEvent(event<>)`. The `vBottle` can then be sent over a port to another module.
+
+The best practice for reading events a YARP port is done with a wrapper function `ev::qAllocator`.
+
 ## Code: qAllocator
 
 The ``ev::qAllocator`` is a class that uses a ``yarp::os::BufferedPort`` to read events asynchronously (it uses a callback) and allocates the ``ev::vQueue`` for each packet. An event-driven processing module will need to ask the ``qAllocator`` for a ``vQueue``:
