@@ -54,10 +54,12 @@ void rateCalcThread::setInputPortName(std::string name)
 yarp::sig::Vector rateCalcThread::getRate()
 {
 
+    m.lock();
     // FILL IN CODE HERE
     // calculate the event rate from count and period.
     // remember to scale the time value
 
+    m.unlock();
     return rates;
 
 }
@@ -79,6 +81,9 @@ void rateCalcThread::run()
         // deallocate the q.
         // what else can we count?
 
+        m.lock();
+        //update current_period, left_count, right_count
+        m.unlock();
     }
 }
 
