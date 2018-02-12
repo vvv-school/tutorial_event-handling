@@ -30,7 +30,8 @@ class rateCalcThread : public Thread
 {
 private:
 
-    yarp::sig::Vector rates;
+    yarp::os::Mutex m;
+    yarp::sig::Vector rates; //[left-rate right-rate]
     std::string port_name;
     queueAllocator q_alloc;
 
