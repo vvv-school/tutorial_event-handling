@@ -55,9 +55,11 @@ yarp::sig::Vector rateCalcThread::getRate()
 {
 
     m.lock();
+    rates = 0;
     // FILL IN CODE HERE
     // calculate the event rate from count and period.
     // remember to scale the time value
+
 
     m.unlock();
     return rates;
@@ -67,7 +69,7 @@ yarp::sig::Vector rateCalcThread::getRate()
 bool rateCalcThread::threadInit()
 {
     rates.resize(2, 0.0);
-    return q_alloc.open(port_name + "/vBottle:i");
+    return input_port.open(port_name + "/AE:i");
 }
 
 void rateCalcThread::run()
@@ -81,16 +83,19 @@ void rateCalcThread::run()
         // deallocate the q.
         // what else can we count?
 
+
         m.lock();
         //update current_period, left_count, right_count
+
+
         m.unlock();
+
     }
 }
 
 void rateCalcThread::onStop()
 {
-    q_alloc.close();
-    q_alloc.releaseDataLock();
+    input_port.close();
 }
 
 /******************************************************************************/
@@ -110,8 +115,7 @@ bool eventRateConfiguration::configure(yarp::os::ResourceFinder &rf)
     }
 
     //set the input port name and start the thread
-    rate_calculator.setInputPortName(
-                rf.check("name", yarp::os::Value("/vRate")).asString());
+    rate_calculator.setInputPortName(name);
     return rate_calculator.start();
 }
 

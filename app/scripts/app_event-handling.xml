@@ -1,5 +1,5 @@
 <application>
-<name> event-rate-calculation </name>
+<name> event-handling </name>
 
 <dependencies>
 </dependencies>
@@ -12,37 +12,37 @@
 
 <module>
     <name> vPreProcess </name>
-    <parameters> --flipx --flipy --temporalSize 250000 </parameters>
+    <parameters> --flipx --flipy --temporalSize 250000 --split </parameters>
     <node> localhost </node>
 </module>
 
 <module>
-    <name> tutorial_event-rate</name>
+    <name> tutorial_event-handling</name>
     <parameters> --name /vRate --period 0.1 </parameters>
     <node>localhost</node>
 </module>
 
 <module>
-    <name>vFramer</name>
-    <parameters> --displays "(0 /left (AE) 1 /right (AE))" --frameRate 20 </parameters>
+    <name>vFramerLite</name>
+    <parameters> --displays "(/left (AE) /right (AE))" --frameRate 20 </parameters>
     <node>localhost</node>
 </module>
 
 <module>
     <name>yarpview</name>
-    <parameters>--name /view/left </parameters>
+    <parameters>--name /view/left --compact --x 20 --y 20</parameters>
     <node>localhost</node>
 </module>
 
 <module>
     <name>yarpview</name>
-    <parameters>--name /view/right </parameters>
+    <parameters>--name /view/right --compact --x 350 --y 20</parameters>
     <node>localhost</node>
 </module>
 
 <module>
     <name>yarpscope</name>
-    <parameters>--remote /vRate/rate:o --index "(0 1)" --color "(green blue)" --interval 200 </parameters>
+    <parameters>--remote /vRate/rate:o --index "(0 1)" --color "(green blue)" --interval 100 --size 100 --x 700 --y 20</parameters>
     <node>localhost</node>
 </module>
 
@@ -53,27 +53,39 @@
 </connection>
 
 <connection>
-    <from>/vPreProcess/vBottle:o</from>
-    <to>/vRate/vBottle:i</to>
+    <from>/vPreProcess/left:o</from>
+    <to>/vRate/AE:i</to>
     <protocol>udp</protocol>
 </connection>
 
 <connection>
-    <from>/vPreProcess/vBottle:o</from>
-    <to>/vFramer/AE:i</to>
+    <from>/vPreProcess/right:o</from>
+    <to>/vRate/AE:i</to>
     <protocol>udp</protocol>
 </connection>
 
 <connection>
-    <from> /vFramer/left</from>
+    <from>/vPreProcess/left:o</from>
+    <to>/vFramer/left/AE:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from>/vPreProcess/right:o</from>
+    <to>/vFramer/right/AE:i</to>
+    <protocol>udp</protocol>
+</connection>
+
+<connection>
+    <from> /vFramer/left/image:o</from>
     <to> /view/left </to>
-    <protocol>udp</protocol>
+    <protocol>fast_tcp</protocol>
 </connection>
 
 <connection>
-    <from> /vFramer/right</from>
+    <from> /vFramer/right/image:o</from>
     <to> /view/right </to>
-    <protocol>udp</protocol>
+    <protocol>fast_tcp</protocol>
 </connection>
 
 

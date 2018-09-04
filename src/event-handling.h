@@ -30,12 +30,14 @@ class rateCalcThread : public Thread
 {
 private:
 
-    yarp::os::Mutex m;
+    Mutex m;
     yarp::sig::Vector rates; //[left-rate right-rate]
-    std::string port_name;
-    queueAllocator q_alloc;
 
-    double current_period;
+    std::string port_name;
+    vReadPort<AE> input_port;
+
+    double left_period;
+    double right_period;
     unsigned int left_count;
     unsigned int right_count;
 
