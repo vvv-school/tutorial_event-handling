@@ -9,9 +9,7 @@
 #include <rtf/dll/Plugin.h>
 #include <rtf/TestAssert.h>
 
-
 #include <yarp/os/all.h>
-#include <iCub/eventdriven/all.h>
 
 using namespace std;
 using namespace RTF;
@@ -29,7 +27,7 @@ private:
 public:
     /******************************************************************/
     TestTutorialEventHandler() :
-        yarp::rtf::TestCase("TestAssignmentEventSpikingModel")
+        yarp::rtf::TestCase("TestTutorialEventHandling")
     {
     }
 
@@ -52,8 +50,8 @@ public:
                                   "Could not connect RPC to yarpdataplayer");
 
         //we need to check the output of yarpdataplayer is open and input of spiking model
-        RTF_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/zynqGrabber/vBottle:o", "/event-handler/vBottle:i", "udp"),
-                                  "Could not connect yarpdataplayer to spiking model");
+        //RTF_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/zynqGrabber/vBottle:o", "/event-handler/vBottle:i", "udp"),
+        //                          "Could not connect yarpdataplayer to spiking model");
 
         RTF_TEST_REPORT("Ports successfully open and connected");
 
@@ -77,7 +75,7 @@ public:
         playercontroller.write(cmd, reply);
         RTF_ASSERT_ERROR_IF_FALSE(reply.get(0).asString() == "ok", "Did not successfully play the dataset");
 
-        yarp::os::Time::delay(5);
+        yarp::os::Time::delay(40);
 
         cmd.clear();
         cmd.addString("stop");

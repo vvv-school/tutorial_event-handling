@@ -17,5 +17,5 @@ fi
 
 yarpdataplayer &
 sleep 1
-echo "load $ROBOT_CODE/datasets/Dataset_event-spiking-model" | yarp rpc /yarpdataplayer/rpc:i
+echo "load $ROBOT_CODE/datasets/VVV-eventdriven/1" | yarp rpc /yarpdataplayer/rpc:i
 sleep 1
