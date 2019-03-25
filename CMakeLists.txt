@@ -7,7 +7,7 @@ project(tutorial_event-handling)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 
 # mandatory use of these packages
-find_package(YARP 3.0 REQUIRED)
+find_package(YARP 3.1.101 REQUIRED)
 find_package(ICUBcontrib REQUIRED)
 find_package(eventdriven REQUIRED)
 

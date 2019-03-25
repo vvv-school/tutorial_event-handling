@@ -5,18 +5,18 @@
 */
 #include <string>
 
-#include <yarp/rtf/TestCase.h>
-#include <rtf/dll/Plugin.h>
-#include <rtf/TestAssert.h>
+#include <yarp/robottestingframework/TestCase.h>
+#include <robottestingframework/dll/Plugin.h>
+#include <robottestingframework/TestAssert.h>
 
 #include <yarp/os/all.h>
 
 using namespace std;
-using namespace RTF;
+using namespace robottestingframework;
 
 
 /**********************************************************************/
-class TestTutorialEventHandler : public yarp::rtf::TestCase
+class TestTutorialEventHandler : public yarp::robottestingframework::TestCase
 {
 
 private:
@@ -27,7 +27,7 @@ private:
 public:
     /******************************************************************/
     TestTutorialEventHandler() :
-        yarp::rtf::TestCase("TestTutorialEventHandling")
+        yarp::robottestingframework::TestCase("TestTutorialEventHandling")
     {
     }
 
@@ -43,17 +43,17 @@ public:
         //we need to load the data file into yarpdataplayer
         std::string cntlportname = "/playercontroller/rpc";
 
-        RTF_ASSERT_ERROR_IF_FALSE(playercontroller.open(cntlportname),
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(playercontroller.open(cntlportname),
                                   "Could not open RPC to yarpdataplayer");
 
-        RTF_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect(cntlportname, "/yarpdataplayer/rpc:i"),
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect(cntlportname, "/yarpdataplayer/rpc:i"),
                                   "Could not connect RPC to yarpdataplayer");
 
         //we need to check the output of yarpdataplayer is open and input of spiking model
-        //RTF_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/zynqGrabber/vBottle:o", "/event-handler/vBottle:i", "udp"),
+        //ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/zynqGrabber/vBottle:o", "/event-handler/vBottle:i", "udp"),
         //                          "Could not connect yarpdataplayer to spiking model");
 
-        RTF_TEST_REPORT("Ports successfully open and connected");
+        ROBOTTESTINGFRAMEWORK_TEST_REPORT("Ports successfully open and connected");
 
         return true;
     }
@@ -61,7 +61,7 @@ public:
     /******************************************************************/
     virtual void tearDown()
     {
-        RTF_TEST_REPORT("Closing Clients");
+        ROBOTTESTINGFRAMEWORK_TEST_REPORT("Closing Clients");
         playercontroller.close();
     }
 
@@ -73,16 +73,16 @@ public:
         yarp::os::Bottle cmd, reply;
         cmd.addString("play");
         playercontroller.write(cmd, reply);
-        RTF_ASSERT_ERROR_IF_FALSE(reply.get(0).asString() == "ok", "Did not successfully play the dataset");
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(reply.get(0).asString() == "ok", "Did not successfully play the dataset");
 
         yarp::os::Time::delay(40);
 
         cmd.clear();
         cmd.addString("stop");
         playercontroller.write(cmd, reply);
-        RTF_ASSERT_ERROR_IF_FALSE(reply.get(0).asString() == "ok", "Did not successfully stop the dataset");
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(reply.get(0).asString() == "ok", "Did not successfully stop the dataset");
 
     }
 };
 
-PREPARE_PLUGIN(TestTutorialEventHandler)
+ROBOTTESTINGFRAMEWORK_PREPARE_PLUGIN(TestTutorialEventHandler)
