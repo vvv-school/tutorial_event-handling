@@ -18,6 +18,7 @@
 
 #include <yarp/os/all.h>
 #include <iCub/eventdriven/all.h>
+#include <mutex>
 #include <string>
 
 using namespace ev;
@@ -30,7 +31,7 @@ class rateCalcThread : public Thread
 {
 private:
 
-    Mutex m;
+    std::mutex m;
     yarp::sig::Vector rates; //[left-rate right-rate]
 
     std::string port_name;

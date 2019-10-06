@@ -53,17 +53,14 @@ void rateCalcThread::setInputPortName(std::string name)
 
 yarp::sig::Vector rateCalcThread::getRate()
 {
+    std::lock_guard<std::mutex> lck(m);
 
-    m.lock();
     rates = 0;
     // FILL IN CODE HERE
     // calculate the event rate from count and period.
     // remember to scale the time value
 
-
-    m.unlock();
     return rates;
-
 }
 
 bool rateCalcThread::threadInit()
@@ -74,7 +71,6 @@ bool rateCalcThread::threadInit()
 
 void rateCalcThread::run()
 {
-
     yarp::os::Stamp stamp;
     while(!isStopping()) {
 
@@ -83,12 +79,8 @@ void rateCalcThread::run()
         // deallocate the q.
         // what else can we count?
 
-
-        m.lock();
+        std::lock_guard<std::mutex> lck(m);
         //update current_period, left_count, right_count
-
-
-        m.unlock();
 
     }
 }
