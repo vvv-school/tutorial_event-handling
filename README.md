@@ -1,9 +1,11 @@
-# Tutorial on Handling the Event Driven Data Stream
-This tutorial introduces the basic components for handling event-driven data stream. You will use a simple application to learn the dedicated data structures and functions in the event-driven library and the basic components required to create an event-driven module.
+# Tutorial on Simple Processing of the Event Stream
+This tutorial introduces the basic components for reading, processing, and creating an output from the event data produced by an event-camera. We will write a simple application to learn the functions needed from the event-driven library and the basic steps required to create an _event-driven_ module.
 
 Main topics:
-- Event definition in c++
-- How events are stored in packets
+- Reading packets of events over YARP
+- Understanding the information contained in an event
+- 
+- 
 - How to read/write events to YARP ports
 
 ### Requirements:
